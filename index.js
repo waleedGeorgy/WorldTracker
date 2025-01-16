@@ -17,7 +17,9 @@ db.connect();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-let currentUserId = 1;
+const firstUserId = await db.query("SELECT id from users");
+console.log(firstUserId.rows[0].id);
+let currentUserId = firstUserId.rows[0].id;
 let users = [];
 
 async function checkVisisted(){
@@ -63,11 +65,9 @@ app.post("/add", async (req, res) => {
       "SELECT country_code FROM countries WHERE LOWER(country_name) LIKE '%' || $1 || '%';",
       [input.toLowerCase()]
     );
-
     if (result.rows.length !== 0) {
       const data = result.rows[0];
       const countryCode = data.country_code;
-
       try {
         await db.query("INSERT INTO visited_countries (country_code, user_id) VALUES ($1, $2);", [countryCode, currentUserId]);
         res.redirect("/");
@@ -91,6 +91,18 @@ app.post("/user", async (req, res) => {
   } else {
     currentUserId = req.body.user;
     res.redirect("/");
+  }
+});
+
+app.get("/delete/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    await db.query("DELETE FROM visited_countries WHERE user_id = $1;", [userId]);
+    await db.query("DELETE FROM users WHERE id = $1;", [userId]);
+    console.log("Delete successful");
+    res.redirect("/");
+  } catch (error) {
+    console.log(error)
   }
 });
 

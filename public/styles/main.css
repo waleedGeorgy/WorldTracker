@@ -94,6 +94,13 @@ button {
   cursor: pointer;
 }
 
+#delete-user{
+  text-decoration: none;
+  margin-left: 4px;
+  position: relative;
+  top:3px;
+}
+
 .total-count {
   font-family: "Roboto", sans-serif;
   color: white;
